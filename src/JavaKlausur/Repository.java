@@ -1,3 +1,4 @@
+//@TODO package einmal durch sprechen
 package JavaKlausur;
 
 import JavaKlausur.model.*;
@@ -7,7 +8,10 @@ import java.util.*;
 import java.io.*;
 
 public class Repository {
-    // was ist der Unterschied zwischen ArrayList und List?
+    private static final int MAX = 200;
+
+    // @TODO was ist der Unterschied zwischen ArrayList und List bzw Map und Hashmap?
+    // @TODO was ist ein Interface?
     private Map<Integer, Schauspieler> schauspieler = new HashMap<>();
     private Map<Integer, Film> filme = new HashMap<>();
     private Map<Integer, Regisseur> regisseure = new HashMap<>();
@@ -36,8 +40,71 @@ public class Repository {
         this.bewertungen.add(bewertung);
     }
 
+    // @TODO was soll das?
+    private Benutzer ensureBenutzer(String name) {
+        Benutzer b = getBenutzer(name);
+        if (b == null) {
+            b = new Benutzer(name);
+            addBenutzer(b);
+        }
+        return b;
+    }
 
-    // AUTO BOXING BESPRECHEN
+    public Collection<Film> getFilme() {
+        return this.filme.values();
+    }
+
+    public Collection<Schauspieler> getSchauspieler() {
+        return schauspieler.values();
+    }
+
+    public Collection<Regisseur> getRegisseure() {
+        return regisseure.values();
+    }
+
+    public Collection<Benutzer> getBenutzer() {
+        return benutzer.values();
+    }
+
+    public List<Bewertung> getBewertungen() {
+        return bewertungen;
+    }
+
+    public Collection<Genre> getGenre() {
+        return genre.values();
+    }
+
+    public void addBenutzer(Benutzer b) {
+        this.benutzer.put(b.getName(), b);
+    }
+
+    public Benutzer getBenutzer(String name) {
+        return this.benutzer.get(name);
+    }
+
+    public Regisseur getRegisseur(int id) {
+        return this.regisseure.get(id);
+    }
+
+    public Genre getGenre(String name) {
+        return this.genre.get(name);
+    }
+
+    private Genre ensureGenre(String name) {
+        Genre g = getGenre(name);
+        if (g == null) {
+            g = new Genre(name);
+            addGenre(g);
+        }
+        return g;
+    }
+
+    public void addGenre(Genre g) {
+        this.genre.put(g.getName(), g);
+    }
+
+
+    // @TODO AUTO BOXING BESPRECHEN
     public Film getFilm(int id) {
         return this.filme.get(id);
     }
@@ -47,8 +114,9 @@ public class Repository {
     }
 
 
-    // ALLES NICHT STATIC MACHEN UND getSchauspieler(int id) etc benennen
-    private static Schauspieler suchenSchauspieler(List<Schauspieler> liste, int id) {
+    // @TODO STATIC vs NON-STATIC: ALLES NICHT STATIC MACHEN UND getSchauspieler(int id) etc benennen
+    /*private static Schauspieler suchenSchauspieler(List<Schauspieler> liste, int id) {
+        // @TODO hier mal beispielhaft durch gehen.. warum static? warum Liste der Schauspieler mit rein?
         for (int i = 0; i < liste.size(); i++) {
             if ((liste.get(i).getId()) == id) {
                 return liste.get(i);
@@ -102,12 +170,18 @@ public class Repository {
             }
         }
         return null;
+    }*/
+
+
+    //@TODO überladen von Methoden
+    public List<Film> suchen(String film) {
+        return suchen(film, MAX);
     }
 
-
-
-    public List<Film> suchen(String film) {
+    public List<Film> suchen(String film, int limit) {
+        //@TODO limit berücksichtigen
         List<Film> result = new ArrayList<>();
+        // @TODO for (int i=0; i<... vs for (T t : iteratable)..
         for (Film f : this.filme.values()) {
             if (f.getName().contains(film)) {
                 result.add(f);
@@ -116,12 +190,43 @@ public class Repository {
         return result;
     }
 
+    public List<Film> suchenMitGenre(String name) {
+        return suchenMitGenre(name, MAX);
+    }
+
+    public List<Film> suchenMitGenre(String name, int limit) {
+        //@TODO implement mit name enthält kommaseparierte genres
+        return null;
+    }
+
+    public List<Film> suchenMitSchauspieler(String name) {
+        return suchenMitSchauspieler(name, MAX);
+    }
+
+    public List<Film> suchenMitSchauspieler(String name, int limit) {
+        return null;
+    }
+
+    public List<Film> suchen(String movieNames, String genreNames, String actorNames, String directorNames, int limit) {
+        //@TODO implementieren
+        //@TODO refactor suchenMitXYZ, so dass diese Methode genutzt wird
+        return null;
+    }
+
+    // @TODO STATIC vs NON-STATIC
+    /*
+     * das hier soll so eine Art Factory sein, die ein Repository aus einer Datei erstellen kann... daher static
+     * Das Ergebnis soll dann ein fertig gefülltes Repository sein..
+     */
     public static Repository fillRepository(String fileName) throws IOException {
+        // @TODO einmal Zeile für Zeile durch gehen..
         Repository repository = new Repository();
+
+        // @TODO was ist das hier komisches? warum fr?
         BufferedReader fr = new BufferedReader(new FileReader(fileName));
 
-
         int entity = 0;
+        // @TODO initiieren vs nicht initiieren... FINAL vs NON-FINAL
         String buffer;
         List<String> zeile;
 
@@ -198,44 +303,6 @@ public class Repository {
         return repository;
     }
 
-    private Benutzer ensureBenutzer(String name) {
-        Benutzer b = getBenutzer(name);
-        if (b == null) {
-            b = new Benutzer(name);
-            addBenutzer(b);
-        }
-        return b;
-    }
-
-    private void addBenutzer(Benutzer b) {
-        this.benutzer.put(b.getName(), b);
-    }
-
-    private Benutzer getBenutzer(String name) {
-        return this.benutzer.get(name);
-    }
-
-    private Regisseur getRegisseur(int id) {
-        return this.regisseure.get(id);
-    }
-
-    private Genre getGenre(String name) {
-        return this.genre.get(name);
-    }
-
-    private Genre ensureGenre(String name) {
-        Genre g = getGenre(name);
-        if (g == null) {
-            g = new Genre(name);
-            addGenre(g);
-        }
-        return g;
-    }
-
-    private void addGenre(Genre g) {
-        this.genre.put(g.getName(), g);
-    }
-
     private static int parseIntWithDefault(String s, int i) {
         try {
             if (s != null && !s.isEmpty()) {
@@ -260,12 +327,8 @@ public class Repository {
     private static List<String> zeileZerlegen(String buffer) {
         boolean anfuehrungszeichen = false;
         String wort = "";
-
         List<String> zeile = new ArrayList<>();
-
         for (int i = 0; i < buffer.length(); i++) {
-
-
             if (buffer.charAt(i) == '"') {
                 if (anfuehrungszeichen) {
                     zeile.add(wort.trim());
