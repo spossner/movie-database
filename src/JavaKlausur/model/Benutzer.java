@@ -4,21 +4,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Benutzer {
-	private String username; // kannst das auch name nennen
-	private List<Bewertung> bewertungen= new ArrayList<Bewertung>();
-	
-	public Benutzer(String username) {
-		this.username = username;
-	}
-	
-	public List<Bewertung> getBewertungen(){
-		return bewertungen;
-	}
+    private String username; // kannst das auch name nennen
+    // @TODO new ArrayList<Bewertung>() vs new ArrayList<>() -> umbauen auf <>
+    private List<Bewertung> bewertungen = new ArrayList<Bewertung>();
 
-	// bewertung als Map mit username als key?
-	public void addBewertung(Bewertung bewertung) {
-		this.bewertungen.add(bewertung);
+    public Benutzer(String username) {
+        this.username = username;
+    }
+
+    public List<Bewertung> getBewertungen() {
+        return bewertungen;
+    }
+
+    // @TODO bewertung als Map mit username als key?
+    public void addBewertung(Bewertung bewertung) {
+        this.bewertungen.add(bewertung);
+
 		/*
+		// @TODO einmal durch führen.. was hast Du Dir gedacht?
 		boolean exist = false;
 		for(int i = 0 ; i < bewertungen.size(); i++) {
 			if((bewertungen.get(i).getBenutzer().getName()).equals(username)) {
@@ -32,9 +35,9 @@ public class Benutzer {
 		if(!exist) {
 		bewertungen.add(bewertung);
 		}*/
-	}
+    }
 
-	public String getName() {
-		return username;
-	}
+    public String getName() {
+        return username;
+    }
 }
