@@ -206,6 +206,14 @@ public class Repository {
     public List<Film> suchenMitSchauspieler(String name, int limit) {
         return null;
     }
+    
+    public List<Film> suchenMitRegisseur(String name) {
+        return suchenMitRegisseur(name, MAX);
+    }
+
+    public List<Film> suchenMitRegisseur(String name, int limit) {
+        return null;
+    }
 
     public List<Film> suchen(String movieNames, String genreNames, String actorNames, String directorNames, int limit) {
         //@TODO implementieren
