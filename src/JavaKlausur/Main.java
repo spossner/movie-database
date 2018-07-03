@@ -10,6 +10,10 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) throws IOException {
+    	for (String s : args) {
+    		System.out.println(s);
+    	}
+    	
         Scanner scan = new Scanner(System.in);
         String buffer;
         //@TODO println vs print.. und \n
