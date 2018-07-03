@@ -20,7 +20,7 @@ public class Repository {
     private Map<String, Genre> genre = new HashMap<>();
 
     public void addSchauspieler(Schauspieler schauspieler) {
-        // was ist hier this.?
+        // @TODO was ist hier this.?
         this.schauspieler.put(schauspieler.getId(), schauspieler);
     }
 
@@ -173,7 +173,7 @@ public class Repository {
     }*/
 
 
-    //@TODO überladen von Methoden
+    //@TODO überladen von Methoden suchen(String) und suchen(String, int)
     public List<Film> suchen(String film) {
         return suchen(film, MAX);
     }
@@ -181,7 +181,7 @@ public class Repository {
     public List<Film> suchen(String film, int limit) {
         //@TODO limit berücksichtigen
         List<Film> result = new ArrayList<>();
-        // @TODO for (int i=0; i<... vs for (T t : iteratable)..
+        // @TODO for (int i=0; i<... vs for (T t : Iterable)..
         for (Film f : this.filme.values()) {
             if (f.getName().contains(film)) {
                 result.add(f);
@@ -225,6 +225,10 @@ public class Repository {
     /*
      * das hier soll so eine Art Factory sein, die ein Repository aus einer Datei erstellen kann... daher static
      * Das Ergebnis soll dann ein fertig gefülltes Repository sein..
+     * 
+     * @TODO unbedingt möglichst kleine und einfache Methoden
+     * @TODO lokale Variablen.. doppelte Funkltionalität vermeiden -> in Methode auslagern
+     * @TODO was macht throws IOException.. und was kommt da?
      */
     public static Repository fillRepository(String fileName) throws IOException {
         // @TODO einmal Zeile für Zeile durch gehen..
@@ -238,6 +242,8 @@ public class Repository {
         String buffer;
         List<String> zeile;
 
+        long start = System.currentTimeMillis();
+        
         try {
             while ((buffer = fr.readLine()) != null) {
                 if (buffer.startsWith("New_Entity:")) {
@@ -296,21 +302,27 @@ public class Repository {
 
                             repository.addBewertung(rating);
                             user.addBewertung(rating);
+                            
+                            // @TODO auch im Film die Bewertung setzen?
                             f.addBewertung(rating);
 
-                            // auch im Film die Bewertung setzen?
                             break;
                     }
                 }
                 // hier schließt Du den BufferedReader nach der ersten Zeile... da gibt es eine IOExcreption danach
                 // fr.close(); // -> muss ganz am Ende passieren, wenn alles eingeselen ist
             }
-        } finally {  // try  catch  finally   -> finally wird immer (egal ob eine Exception geflogen ist) ausgeführt.. perfekter Ort, um aufzuräumen
+        } finally {  // @TODO try  catch  finally   -> finally wird immer (egal ob eine Exception geflogen ist) ausgeführt.. perfekter Ort, um aufzuräumen
             fr.close();
         }
+        
+        long end = System.currentTimeMillis();
+        System.out.println("took "+(end-start)+"ms");
+        
         return repository;
     }
 
+    // @TODO was macht das hier? Warum static?
     private static int parseIntWithDefault(String s, int i) {
         try {
             if (s != null && !s.isEmpty()) {
@@ -331,7 +343,7 @@ public class Repository {
         return d;
     }
 
-    // hier mal durch gehen gemeinsam
+    // @TODO hier mal durch gehen gemeinsam
     private static List<String> zeileZerlegen(String buffer) {
         boolean anfuehrungszeichen = false;
         String wort = "";
@@ -347,7 +359,7 @@ public class Repository {
                 }
             } else {
                 if (anfuehrungszeichen) {
-                    // StringBuffer anschauen
+                    // @TODO StringBuffer anschauen
                     wort = wort + buffer.charAt(i);
                 }
             }
