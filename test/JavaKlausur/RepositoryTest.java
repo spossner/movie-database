@@ -1,10 +1,9 @@
 package JavaKlausur;
 
-import JavaKlausur.model.Benutzer;
-import JavaKlausur.model.Bewertung;
-import JavaKlausur.model.Film;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -12,13 +11,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-class RepositoryTest {
+import JavaKlausur.model.Benutzer;
+import JavaKlausur.model.Bewertung;
+import JavaKlausur.model.Film;
+
+public class RepositoryTest {
     private static Repository repository = null;
 
-    @BeforeAll
-    static void setUp() {
+    @BeforeClass
+    public static void setUp() {
         try {
             repository = Repository.fillRepository("./movieproject.db");
         } catch (IOException e) {
@@ -27,7 +31,7 @@ class RepositoryTest {
     }
 
     @Test
-    void getBenutzer() {
+    public void getBenutzer() {
         Benutzer melanieMcfarland = repository.getBenutzer("Melanie Mcfarland");
         assertEquals(521, melanieMcfarland.getBewertungen().size());
 
@@ -45,7 +49,7 @@ class RepositoryTest {
     }
 
     @Test
-    void getFilm() {
+    public void getFilm() {
         Film film = repository.getFilm(8479);
         assertEquals("Day of the Doctor, The", film.getName());
         // @TODO empty String vs null -> what to do?
@@ -53,40 +57,40 @@ class RepositoryTest {
     }
 
     @Test
-    void suchen() {
+    public void suchen() {
         List<Film> filmList = repository.suchen("Matrix");
         assertEquals(3, filmList.size());
         String[] titles = {"Matrix Revolutions, The", "Matrix Reloaded, The", "Matrix, The"};
         Set<String> expectedTitles = new HashSet<>(Arrays.asList(titles));
         for (Film f : filmList) {
-            assertTrue(expectedTitles.contains(f.getName()), f.getName());
+            assertTrue(f.getName(), expectedTitles.contains(f.getName()));
         }
     }
 
     @Test
-    void suchenZweiFilme() {
+    public void suchenZweiFilme() {
         List<Film> filmList = repository.suchen("Matrix", 2);
         assertEquals(2, filmList.size());
         String[] titles = {"Matrix Revolutions, The", "Matrix Reloaded, The", "Matrix, The"};
         Set<String> expectedTitles = new HashSet<>(Arrays.asList(titles));
         for (Film f : filmList) {
-            assertTrue(expectedTitles.contains(f.getName()), f.getName());
+            assertTrue(f.getName(), expectedTitles.contains(f.getName()));
         }
     }
 
     @Test
-    void suchenEinFilm() {
+    public void suchenEinFilm() {
         List<Film> filmList = repository.suchen("Matrix", 1);
         assertEquals(1, filmList.size());
         String[] titles = {"Matrix Revolutions, The", "Matrix Reloaded, The", "Matrix, The"};
         Set<String> expectedTitles = new HashSet<>(Arrays.asList(titles));
         for (Film f : filmList) {
-            assertTrue(expectedTitles.contains(f.getName()), f.getName());
+            assertTrue(f.getName(), expectedTitles.contains(f.getName()));
         }
     }
 
     @Test
-    void testFindMoviesByGenre() {
+    public void testFindMoviesByGenre() {
         List<Film> filme = repository.suchenMitGenre("Thriller,Action", 20000);
         assertEquals(2700, filme.size());
 
@@ -101,7 +105,7 @@ class RepositoryTest {
     }
 
     @Test
-    void testFindMoviesByActor() {
+    public void testFindMoviesByActor() {
         List<Film> filme = repository.suchenMitSchauspieler("Keanu Reeves,Hugo Weaving");
         assertEquals(37, filme.size());
 
@@ -110,7 +114,7 @@ class RepositoryTest {
     }
 
     @Test
-    void testMovieHasDirector() {
+    public void testMovieHasDirector() {
         Film film = repository.getFilm(2081);
         String[] directors = { "Laurence Fishburne" };
 
@@ -124,18 +128,18 @@ class RepositoryTest {
     }
 
     @Test
-    void testFindMovies() {
+    public void testFindMovies() {
         List<Film> filme = repository.suchen(null,"Action", "Jason Statham,Keanu Reeves", null, 50);
         assertEquals(27, filme.size());
     }
 
     @Test
-    void testMovieImport() {
+    public void testMovieImport() {
         assertEquals(9125, repository.getFilme().size());
     }
 
     @Test
-    void testActorImport() {
+    public void testActorImport() {
         // import all actors
         assertEquals(18159, repository.getSchauspieler().size());
 
@@ -148,21 +152,21 @@ class RepositoryTest {
 
     /*
     @Test
-    void testMoviesByRating() {
+    public void testMoviesByRating() {
         Benutzer michaelStone = repository.getBenutzer("Michael Stone");
         List<Film> moviesByRating = michaelStone.findMoviesByRating(4);
         assertEquals(43, moviesByRating.size());
     }
 
     @Test
-    void testUsersByRating() {
+    public void testUsersByRating() {
         Film matrixMovie = repository.getFilm(2081);
         List<Benutzer> usersByRating = matrixMovie.findUsersByRating(5);
         assertEquals(95, usersByRating.size());
     }
 
     @Test
-    void testMoviesByUsers() {
+    public void testMoviesByUsers() {
         Film film = repository.getFilm(285);
         List<Film> movieRecommendations = repository.findMovieRecommendationsByMovies(film);
     }

@@ -1,32 +1,32 @@
 package nils;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
 
-class NamedItemTest {
+public class NamedItemTest {
 	private NamedItem item = null;
 	
-	@BeforeEach
-	void setup() {
+	@Before
+	public void setup() {
 		this.item = new NamedItem("Keanu Reeves in THE MATRIX");
 	}
 
 	@Test
-	void testToString() {
+	public void testToString() {
 		String s = this.item.getName();
 		assertEquals("Keanu Reeves in THE MATRIX", s);
 	}
 
 	@Test
-	void testLowercase() {
+	public void testLowercase() {
 		String s = this.item.getLowercaseName();
 		assertEquals("keanu reeves in the matrix", s);
 	}
 	
 	@Test
-	void testCamelcase() {
+	public void testCamelcase() {
 		String s = this.item.getCamelcaseName();
 		assertEquals("KeanuReevesInTheMatrix", s);
 	}
