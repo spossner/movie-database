@@ -45,7 +45,7 @@ public class RepositoryTest {
 
         assertEquals("Melanie Mcfarland", rating.getBenutzer().getName());
 
-        assertEquals(1.0, rating.getRating());
+        assertEquals(1.0, rating.getRating(), 0.0001);
     }
 
     @Test
@@ -58,7 +58,7 @@ public class RepositoryTest {
 
     @Test
     public void suchen() {
-        List<Film> filmList = repository.suchen("Matrix");
+        List<Film> filmList = repository.suchenMitTitel("Matrix");
         assertEquals(3, filmList.size());
         String[] titles = {"Matrix Revolutions, The", "Matrix Reloaded, The", "Matrix, The"};
         Set<String> expectedTitles = new HashSet<>(Arrays.asList(titles));
@@ -69,7 +69,7 @@ public class RepositoryTest {
 
     @Test
     public void suchenZweiFilme() {
-        List<Film> filmList = repository.suchen("Matrix", 2);
+        List<Film> filmList = repository.suchenMitTitel("Matrix", 2);
         assertEquals(2, filmList.size());
         String[] titles = {"Matrix Revolutions, The", "Matrix Reloaded, The", "Matrix, The"};
         Set<String> expectedTitles = new HashSet<>(Arrays.asList(titles));
@@ -80,7 +80,7 @@ public class RepositoryTest {
 
     @Test
     public void suchenEinFilm() {
-        List<Film> filmList = repository.suchen("Matrix", 1);
+        List<Film> filmList = repository.suchenMitTitel("Matrix", 1);
         assertEquals(1, filmList.size());
         String[] titles = {"Matrix Revolutions, The", "Matrix Reloaded, The", "Matrix, The"};
         Set<String> expectedTitles = new HashSet<>(Arrays.asList(titles));
@@ -118,13 +118,13 @@ public class RepositoryTest {
         Film film = repository.getFilm(2081);
         String[] directors = { "Laurence Fishburne" };
 
-        assertFalse(film.hatRegisseur(directors));
+        assertFalse(film.hasRegisseur(directors));
 
         String[] directors2 = { "Laurence Fishburne", "Andy Wachowski" };
-        assertTrue(film.hatRegisseur(directors2));
+        assertTrue(film.hasRegisseur(directors2));
 
         String[] directors3 = { "Andy Wachowski" };
-        assertTrue(film.hatRegisseur(directors3));
+        assertTrue(film.hasRegisseur(directors3));
     }
 
     @Test
@@ -152,6 +152,13 @@ public class RepositoryTest {
 
     /*
     @Test
+    public void testFindMoviesWithSimilarRating() {
+        List<Film> filmList = repository.suchen("Matrix", null, null, null);
+        System.out.println(filmList);
+        assertEquals(324, filmList.size());
+    }
+
+    /*@Test
     public void testMoviesByRating() {
         Benutzer michaelStone = repository.getBenutzer("Michael Stone");
         List<Film> moviesByRating = michaelStone.findMoviesByRating(4);
@@ -169,6 +176,5 @@ public class RepositoryTest {
     public void testMoviesByUsers() {
         Film film = repository.getFilm(285);
         List<Film> movieRecommendations = repository.findMovieRecommendationsByMovies(film);
-    }
-    */
+    }*/
 }
