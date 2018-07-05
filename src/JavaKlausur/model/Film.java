@@ -2,6 +2,7 @@ package JavaKlausur.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Film {
 
@@ -11,9 +12,9 @@ public class Film {
     private String release;
     private int votes;
     private double rating;
-    private List<Schauspieler> schauspieler = new ArrayList<Schauspieler>();
-    private List<Regisseur> regisseure = new ArrayList<Regisseur>();
-    private List<Genre> genre = new ArrayList<Genre>();
+    private List<Schauspieler> schauspieler = new ArrayList<>();
+    private List<Regisseur> regisseure = new ArrayList<>();
+    private List<Genre> genre = new ArrayList<>();
     private List<Bewertung> bewertungen = new ArrayList<>();
 
 
@@ -82,7 +83,49 @@ public class Film {
         this.bewertungen.add(bewertung);
     }
 
-    // @TODO toString.. was ist das und was macht das?
+    public boolean hasRegisseur(String[] names) {
+    	for (Regisseur r : this.regisseure) {
+			for (String name : names) {
+				if (r.getName().equals(name)) {
+					return true;
+				}
+			}
+		}
+		return false;
+    }
+
+	public boolean hasGenre(String[] genres) {
+		for (Genre g : this.genre) {
+			for (String name : genres) {
+				if (g.getName().equals(name)) {
+					return true;
+				}
+			}
+
+		}
+		return false;
+	}
+
+	public boolean hasSchauspieler(String[] names) {
+		for (Schauspieler s : this.schauspieler) {
+			for (String name : names) {
+				if (s.getName().equals(name)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+    public boolean hasInTitle(String[] names) {
+        for (String name : names) {
+            if (this.name.contains(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         return "Film{" +
@@ -91,9 +134,19 @@ public class Film {
                 '}';
     }
 
-    public boolean hatRegisseur(String[] namen) {
-        //@TODO prüfen, ob min. einer der übergebenen Namen Regisseur des Films ist
-        return false;
+    // Filme sind gleich, wenn gleiche Id
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Film film = (Film) o;
+        return id == film.id;
+    }
+
+    // id als hashcode für Maps
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
 
