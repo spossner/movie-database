@@ -2,42 +2,38 @@ package JavaKlausur.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Benutzer {
-    private String username; // kannst das auch name nennen
-    // @TODO new ArrayList<Bewertung>() vs new ArrayList<>() -> umbauen auf <>
-    private List<Bewertung> bewertungen = new ArrayList<Bewertung>();
+    private String name;
+    private List<Bewertung> bewertungen = new ArrayList<>();
 
-    public Benutzer(String username) {
-        this.username = username;
+    public Benutzer(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return this.name;
     }
 
     public List<Bewertung> getBewertungen() {
         return bewertungen;
     }
 
-    // @TODO bewertung als Map mit username als key?
     public void addBewertung(Bewertung bewertung) {
         this.bewertungen.add(bewertung);
-
-		/*
-		// @TODO einmal durch führen.. was hast Du Dir gedacht?
-		boolean exist = false;
-		for(int i = 0 ; i < bewertungen.size(); i++) {
-			if((bewertungen.get(i).getBenutzer().getName()).equals(username)) {
-				if((bewertungen.get(i).getFilm().getId()) == bewertung.getFilm().getId()) {
-					exist = true;
-					bewertungen.get(i).changeRating(bewertung.getRating());
-					// hier könntest Du die Schleife abbrechen..
-				}
-			}
-		}
-		if(!exist) {
-		bewertungen.add(bewertung);
-		}*/
     }
 
-    public String getName() {
-        return username;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Benutzer benutzer = (Benutzer) o;
+        return Objects.equals(name, benutzer.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 }
