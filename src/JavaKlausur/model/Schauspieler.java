@@ -7,7 +7,7 @@ import java.util.List;
 public class Schauspieler {
     private int id;
     private String name;
-    private List<Film> filme = new ArrayList<Film>();
+    private List<Film> filme = new ArrayList<>();
 
 
     public Schauspieler(int id, String name) {

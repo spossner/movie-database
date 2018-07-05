@@ -7,8 +7,7 @@ public class Regisseur {
 
     private int id;
     private String name;
-    //@TODO Umbauen auf <>
-    private List<Film> filme = new ArrayList<Film>();
+    private List<Film> filme = new ArrayList<>();
 
 
     public Regisseur(int id, String name) {
