@@ -3,7 +3,6 @@ package JavaKlausur;
 import JavaKlausur.model.Film;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +27,6 @@ public class Main {
                 printHelp();
                 System.exit(0);
             }
-
             Repository repository = Repository.fillRepository("./movieproject.db");
             List<Film> result = repository.suchen(options.get("f"), options.get("g"), options.get("a"), options.get("d"), options.containsKey("l") ? Integer.parseInt(options.get("l")) : 200);
             System.out.println(result);
@@ -50,7 +48,7 @@ public class Main {
             Repository repository = Repository.fillRepository("./movieproject.db");
             long end = System.currentTimeMillis();
             System.out.println("took " + (end - start) + "ms");
-            List<Film> filme = repository.suchen(buffer);
+            List<Film> filme = repository.suchenMitTitel(buffer);
             //@TODO Object.toString -> siehe auch Film
             System.out.println("found " + filme);
             scan.close();
