@@ -22,4 +22,13 @@ public class Bewertung {
     public Benutzer getBenutzer() {
         return benutzer;
     }
+
+    @Override
+    public String toString() {
+        return "Bewertung{" +
+                "benutzer=" + benutzer.getName() +
+                ", film=" + film.getName() +
+                ", rating=" + rating +
+                '}';
+    }
 }

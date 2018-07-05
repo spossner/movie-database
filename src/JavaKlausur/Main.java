@@ -10,6 +10,8 @@ import java.util.Scanner;
 
 
 public class Main {
+    static Repository repository = null;
+
     static String[][] OPTIONS = {
         {"h", "help", null, "Diese Hilfe."},
         {"g", "genre", "Genres", "Es werden bevorzugt Filme der gegebenen Genres vorgeschlagen."},
@@ -27,9 +29,8 @@ public class Main {
                 printHelp();
                 System.exit(0);
             }
-            Repository repository = Repository.fillRepository("./movieproject.db");
-            List<Film> result = repository.suchen(options.get("f"), options.get("g"), options.get("a"), options.get("d"), options.containsKey("l") ? Integer.parseInt(options.get("l")) : 200);
-            System.out.println(result);
+            List<Film> result = getRepository().suchen(options.get("f"), options.get("g"), options.get("a"), options.get("d"), options.containsKey("l") ? Integer.parseInt(options.get("l")) : 200);
+            Utils.dump(result);
             System.exit(0);
         } else {
 
@@ -42,65 +43,50 @@ public class Main {
             buffer = scan.nextLine();
             System.out.println(buffer + "\n");
 
-            // currentTimeMillis
-            long start = System.currentTimeMillis();
-            //@TODO STATIC vs NON-STATIC -> dann rüber in Repository
-            Repository repository = Repository.fillRepository("./movieproject.db");
-            long end = System.currentTimeMillis();
-            System.out.println("took " + (end - start) + "ms");
-            List<Film> filme = repository.suchenMitTitel(buffer);
+            List<Film> filme = getRepository().suchenMitTitel(buffer);
             //@TODO Object.toString -> siehe auch Film
             System.out.println("found " + filme);
             scan.close();
         }
     }
 
+    private static Repository getRepository() {
+        if (repository == null) {
+            try {
+                repository = Repository.fillRepository("./movieproject.db");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return repository;
+    }
+
     private static Map<String, String> parseOptions(String[] args) {
         Map<String,String> options = new HashMap<>();
         try {
             for (String s : args) {
-                String[] kv = s.split("=", 2);
-                String key = kv[0];
-                if (key.startsWith("--")) {
-                    key = key.substring(2);
-                } else if (key.startsWith("-")) {
-                    key = key.substring(1);
-                } else {
-                    throw new IllegalArgumentException("key must start with - or --: " + s);
-                }
-                String value = null;
-                if (kv.length == 2) {
-                    value = kv[1];
-                    if (value.startsWith("'")) {
-                        if (value.endsWith("'")) {
-                            value = value.substring(1, value.length() - 1);
-                        } else {
-                            throw new IllegalArgumentException("quoted parameter not closed: " + s);
-                        }
-                    }
-                }
+                String[] kv = Utils.splitAndTrimQuotes(s, "=", 2);
                 String[] match = null;
                 for (String[] option : OPTIONS) {
-                    if (option[0].equals(key) || option[1].equals(key)) {
+                    if (("-"+option[0]).equals(kv[0]) || ("--"+option[1]).equals(kv[0])) {
                         match = option;
                         break;
                     }
                 }
-
                 if (match == null) {
-                    throw new IllegalArgumentException("unknown parameter " + key + " in " + s);
+                    throw new IllegalArgumentException("unknown parameter " + kv[0] + " in " + s);
                 }
-
-                if (match[2] != null && value == null) {
-                    throw new IllegalArgumentException("missing value of parameter " + key + " in " + s);
+                if (match[2] != null && kv[1] == null) {
+                    throw new IllegalArgumentException("missing value of parameter " + kv[0] + " in " + s);
                 }
-                options.put(match[0], value);
+                options.put(match[0], kv[1]);
             }
         } catch(IllegalArgumentException e) {
             System.err.println(e.getMessage());
             printHelp();
             System.exit(1);
         }
+        System.out.println(options);
         return options;
     }
 

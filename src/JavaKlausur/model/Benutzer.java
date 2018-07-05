@@ -3,6 +3,7 @@ package JavaKlausur.model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class Benutzer {
     private String name;
@@ -35,5 +36,16 @@ public class Benutzer {
     @Override
     public int hashCode() {
         return Objects.hash(name);
+    }
+
+    public List<Film> getFilme(double minRating) {
+        return this.bewertungen.stream().filter(b -> b.getRating() >= minRating).map(Bewertung::getFilm).collect(Collectors.toList());
+    }
+
+    @Override
+    public String toString() {
+        return "Benutzer{" +
+                "name='" + name + '\'' +
+                '}';
     }
 }

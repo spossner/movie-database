@@ -3,6 +3,7 @@ package JavaKlausur.model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class Film {
 
@@ -84,38 +85,38 @@ public class Film {
     }
 
     public boolean hasRegisseur(String[] names) {
-    	for (Regisseur r : this.regisseure) {
-			for (String name : names) {
-				if (r.getName().equals(name)) {
-					return true;
-				}
-			}
-		}
-		return false;
+        for (Regisseur r : this.regisseure) {
+            for (String name : names) {
+                if (r.getName().equals(name)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
-	public boolean hasGenre(String[] genres) {
-		for (Genre g : this.genre) {
-			for (String name : genres) {
-				if (g.getName().equals(name)) {
-					return true;
-				}
-			}
+    public boolean hasGenre(String[] genres) {
+        for (Genre g : this.genre) {
+            for (String name : genres) {
+                if (g.getName().equals(name)) {
+                    return true;
+                }
+            }
 
-		}
-		return false;
-	}
+        }
+        return false;
+    }
 
-	public boolean hasSchauspieler(String[] names) {
-		for (Schauspieler s : this.schauspieler) {
-			for (String name : names) {
-				if (s.getName().equals(name)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+    public boolean hasSchauspieler(String[] names) {
+        for (Schauspieler s : this.schauspieler) {
+            for (String name : names) {
+                if (s.getName().equals(name)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     public boolean hasInTitle(String[] names) {
         for (String name : names) {
@@ -126,12 +127,16 @@ public class Film {
         return false;
     }
 
+
+    public List<Benutzer> getBenutzer(double minRating) {
+        return this.bewertungen.stream().filter(b -> b.getRating() >= minRating).map(Bewertung::getBenutzer).collect(Collectors.toList());
+    }
+
     @Override
     public String toString() {
-        return "Film{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                '}';
+
+        return String.format("%-6s  *%.1f  %-40s", id, rating, String.format("%s (%.4s)", name, release));
+
     }
 
     // Filme sind gleich, wenn gleiche Id

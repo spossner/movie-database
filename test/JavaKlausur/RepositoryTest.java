@@ -6,10 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -17,6 +14,8 @@ import org.junit.Test;
 import JavaKlausur.model.Benutzer;
 import JavaKlausur.model.Bewertung;
 import JavaKlausur.model.Film;
+
+import javax.naming.Name;
 
 public class RepositoryTest {
     private static Repository repository = null;
@@ -65,6 +64,7 @@ public class RepositoryTest {
         for (Film f : filmList) {
             assertTrue(f.getName(), expectedTitles.contains(f.getName()));
         }
+        Utils.dump(filmList);
     }
 
     @Test
@@ -99,6 +99,8 @@ public class RepositoryTest {
 
         filme = repository.suchenMitGenre("Thriller,Action");
         assertEquals(200, filme.size());
+        Utils.dump(filme);
+
 
         filme = repository.suchenMitGenre("Thriller,Action", 1);
         assertEquals(1, filme.size());
@@ -150,28 +152,26 @@ public class RepositoryTest {
         assertEquals("Bill Bambridge", repository.getSchauspieler(10067).getName());
     }
 
-    /*
     @Test
-    public void testFindMoviesWithSimilarRating() {
-        List<Film> filmList = repository.suchen("Matrix", null, null, null);
-        System.out.println(filmList);
-        assertEquals(324, filmList.size());
+    public void testFindMoviesWithGoodRating() {
+        List<Film> filmList = repository.suchen("Matrix", null, null, null, 2000);
+        assertEquals(1452, filmList.size());
     }
 
-    /*@Test
+    @Test
     public void testMoviesByRating() {
         Benutzer michaelStone = repository.getBenutzer("Michael Stone");
-        List<Film> moviesByRating = michaelStone.findMoviesByRating(4);
+        List<Film> moviesByRating = michaelStone.getFilme(4.0);
         assertEquals(43, moviesByRating.size());
     }
 
     @Test
     public void testUsersByRating() {
         Film matrixMovie = repository.getFilm(2081);
-        List<Benutzer> usersByRating = matrixMovie.findUsersByRating(5);
-        assertEquals(95, usersByRating.size());
+        List<Benutzer> benutzer = matrixMovie.getBenutzer(5.0);
+        assertEquals(95, benutzer.size());
     }
-
+/*
     @Test
     public void testMoviesByUsers() {
         Film film = repository.getFilm(285);

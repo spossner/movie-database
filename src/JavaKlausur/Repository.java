@@ -154,15 +154,31 @@ public class Repository {
     public List<Film> suchen(String fromMovies, String genreFilters, String actorFilters, String directorFilters, int limit) {
     	List<Film> result = new ArrayList<>();
 
-    	// split all parameters with comma as spearator; ignore null values
-    	String[] movies = (fromMovies != null ? fromMovies.split(",") : null);
+        Collection<Film> filmList = null;
+
+        if (fromMovies != null) {
+            filmList = new HashSet<>();
+
+            List<Film> filmsByTitle = suchenMitTitel(fromMovies);
+            for (Film f : filmsByTitle) {
+                List<Benutzer> benutzer = f.getBenutzer(5.0);
+                for (Benutzer b : benutzer) {
+                    filmList.addAll(b.getFilme(5.0));
+                }
+            }
+        } else {
+            filmList = filme.values();
+        }
+
+        // FILTER MOVIE LIST
+
+        // split all parameters with comma as spearator; ignore null values
     	String[] genres = (genreFilters != null ? genreFilters.split(",") : null);
     	String[] actors = (actorFilters != null ? actorFilters.split(",") : null);
     	String[] directors = (directorFilters != null ? directorFilters.split(",") : null);
 
-        for (Film f : filme.values()) {
-            if (    (movies == null || f.hasInTitle(movies)) &&
-                    (genres == null || f.hasGenre(genres)) &&
+        for (Film f : filmList) {
+            if (    (genres == null || f.hasGenre(genres)) &&
                     (actors == null || f.hasSchauspieler(actors)) &&
                     (directors == null || f.hasRegisseur(directors))) {
                 result.add(f);
@@ -191,18 +207,18 @@ public class Repository {
                 } else if (entity > 0) {
                     switch (entity) {
                         case 1: // Schauspieler einlesen
-                            List<String> zeile = zeileZerlegen(buffer);
+                            List<String> zeile = Utils.zeileZerlegen(buffer);
                             repository.addSchauspieler(new Schauspieler(Integer.parseInt(zeile.get(0)), zeile.get(1)));
 
                             break;
 
                         case 2: // Filme einlesen
-                            zeile = zeileZerlegen(buffer);
+                            zeile = Utils.zeileZerlegen(buffer);
                             int id = Integer.parseInt(zeile.get(0));
 
                             Film f = repository.getFilm(id);
                             if (f == null) {
-                                f = new Film(id, zeile.get(1), zeile.get(2), zeile.get(4), toInt(zeile.get(5)), toDouble(zeile.get(6)));
+                                f = new Film(id, zeile.get(1), zeile.get(2), zeile.get(4), Utils.toInt(zeile.get(5)), Utils.toDouble(zeile.get(6)));
                                 repository.addFilm(f);
                             }
 
@@ -215,13 +231,13 @@ public class Repository {
                             break;
 
                         case 3: // Regisseure einlesen
-                            zeile = zeileZerlegen(buffer);
+                            zeile = Utils.zeileZerlegen(buffer);
                             repository.addRegisseur(new Regisseur(Integer.parseInt(zeile.get(0)), zeile.get(1)));
 
                             break;
 
                         case 4: // Schauspieler des Films
-                            zeile = zeileZerlegen(buffer);
+                            zeile = Utils.zeileZerlegen(buffer);
                             Schauspieler s = repository.getSchauspieler(Integer.parseInt(zeile.get(0)));
                             f = repository.getFilm(Integer.parseInt(zeile.get(1)));
                             f.addSchauspieler(s);
@@ -230,7 +246,7 @@ public class Repository {
                             break;
 
                         case 5: // Regisseur des Films
-                            zeile = zeileZerlegen(buffer);
+                            zeile = Utils.zeileZerlegen(buffer);
                             Regisseur r = repository.getRegisseur(Integer.parseInt(zeile.get(0)));
                             f = repository.getFilm(Integer.parseInt(zeile.get(1)));
                             f.addRegisseur(r);
@@ -239,7 +255,7 @@ public class Repository {
                             break;
 
                         case 6: // bewertungen
-                            zeile = zeileZerlegen(buffer);
+                            zeile = Utils.zeileZerlegen(buffer);
                             Benutzer user = repository.ensureBenutzer(zeile.get(0));
                             f = repository.getFilm(Integer.parseInt(zeile.get(2)));
 
@@ -261,59 +277,6 @@ public class Repository {
         System.out.println("loading repository took "+(end-start)+"ms");
         
         return repository;
-    }
-
-    private static int toInt(String s) {
-        return toInt(s, 0);
-    }
-
-
-    private static int toInt(String s, int defaultValue) {
-        if (s == null) {
-            return defaultValue;
-        }
-        try {
-            return Integer.parseInt(s);
-        } catch (NumberFormatException e) {
-            return defaultValue;
-        }
-    }
-
-    private static double toDouble(String s) {
-        return toDouble(s, 0.0);
-    }
-
-    private static double toDouble(String s, double defaultValue) {
-        if (s == null) {
-            return defaultValue;
-        }
-        try {
-            return Double.parseDouble(s);
-        } catch (NumberFormatException e) {
-            return defaultValue;
-        }
-    }
-
-    private static List<String> zeileZerlegen(String buffer) {
-        boolean anfuehrungszeichen = false;
-        StringBuilder builder = new StringBuilder();
-        List<String> zeile = new ArrayList<>();
-        for (int i = 0; i < buffer.length(); i++) {
-            if (buffer.charAt(i) == '"') {
-                if (anfuehrungszeichen) {
-                    zeile.add(builder.toString().trim());
-                    builder.setLength(0); // reset the builder
-                    anfuehrungszeichen = false;
-                } else {
-                    anfuehrungszeichen = true;
-                }
-            } else {
-                if (anfuehrungszeichen) {
-                    builder.append(buffer.charAt(i));
-                }
-            }
-        }
-        return zeile;
     }
 }
 	
