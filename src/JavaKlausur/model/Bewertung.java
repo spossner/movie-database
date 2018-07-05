@@ -22,9 +22,4 @@ public class Bewertung {
     public Benutzer getBenutzer() {
         return benutzer;
     }
-
-    //@TODO Getter+Setter -> klassischer setter! -> setRating
-    public void changeRating(double rating) {
-        this.rating = rating;
-    }
 }
