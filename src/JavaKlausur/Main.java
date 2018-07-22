@@ -3,10 +3,7 @@ package JavaKlausur;
 import JavaKlausur.model.Film;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 
 public class Main {
@@ -22,6 +19,20 @@ public class Main {
         {"t", "test", null, "Führt einen Test aus und schreibt das Ergebnis in result.txt."}
     };
 
+    static String[][] COMMANDS = {
+            {"user [<name>]", "Wechselt den Benutzer"},
+            {"list [<film>]", "Zeigt Filme an"},
+            {"film <id>", "Zeigt die Details zu dem Film mit der ID an"},
+            {"ratings", "Zeigt die Bewertungen des gesetzten Benutzers"},
+            {"recos", "Filmempfehlungen"},
+            {"options", "Zeigt die konfigurierbaren Optionen an"},
+            {"set <option>=<value>", "setzt eine Option"},
+            {"clear <option>", "löscht die Option"},
+            {"quit", "Programm beenden"},
+            {"help", "Diese Liste"}
+
+    };
+
     public static void main(String[] args) throws IOException {
         if (args.length > 0) {
             Map<String, String> options = parseOptions(args);
@@ -33,20 +44,80 @@ public class Main {
             Utils.dump(result);
             System.exit(0);
         } else {
+            System.out.println("MOVIE DATABASE\n");
+            System.out.println("loading data...");
 
-            System.out.println("interactive move");
+            Repository repository = Repository.fillRepository("./movieproject.db");
+            System.out.println("loaded " + repository.getFilme().size()+" movies");
+
+            printCommands();
 
             Scanner scan = new Scanner(System.in);
-            String buffer;
-            //@TODO println vs print.. und \n
-            System.out.println("Suche nach deinem Film\n");
-            buffer = scan.nextLine();
-            System.out.println(buffer + "\n");
+            Map<String, String> options = new TreeMap<>();  // stores session options sorted
+            options.put("user", null);
+            for (String[] option : OPTIONS) {
+                if (option[2] != null) {
+                    options.put(option[1],null);
+                }
+            }
+            String buffer = null;
+            try {
+                do {
+                    System.out.printf("%s$ ", options.get("user") != null ? options.get("user") : "");
+                    buffer = scan.nextLine();
 
-            List<Film> filme = getRepository().suchenMitTitel(buffer);
-            //@TODO Object.toString -> siehe auch Film
-            System.out.println("found " + filme);
-            scan.close();
+                    try {
+                        if (buffer.equalsIgnoreCase("quit")) {
+                            System.exit(0);
+                        } else if (buffer.equalsIgnoreCase("help")) {
+                            printCommands();
+                        } else if (buffer.toLowerCase().startsWith("list")) {
+                            String[] kv = Utils.splitAndTrimQuotes(buffer, " ", 2);
+                            if (kv.length == 2) {
+                                options.put("film", kv[1]);
+                            }
+                            List<Film> filmList = repository.suchen(options.get("film"), options.get("genre"), options.get("actor"), options.get("director"), options.get("limit") != null ? Integer.parseInt(options.get("limit")) : 200);
+                            System.out.printf(filmList.size()+" Filme (%s, %s, %s, %s, %s) gefunden:\n\n",options.get("film"), options.get("genre"), options.get("actor"), options.get("director"), options.get("limit") != null ? Integer.parseInt(options.get("limit")) : 200);
+                            Utils.dump(filmList);
+                        } else if (buffer.toLowerCase().startsWith("film")) {
+                            String[] kv = Utils.splitAndTrimQuotes(buffer, " ", 2);
+                            if (kv.length == 2) {
+                                System.out.println(repository.getFilm(Integer.parseInt(kv[1])));
+                            } else {
+                                throw new IllegalArgumentException("Film id fehlt in "+buffer);
+                            }
+                        } else if (buffer.equalsIgnoreCase("options")) {
+                            printOptions(options);
+                        } else if (buffer.toLowerCase().startsWith("set ")) {
+                            String[] kv = Utils.splitAndTrimQuotes(buffer.substring(4), "=", 2);
+                            if (kv.length == 2) {
+                                if (!options.containsKey(kv[0])) {
+                                    throw new IllegalArgumentException("Unbekannte Option "+kv[0]);
+                                }
+                                options.put(kv[0], kv[1]);
+                                printOptions(options);
+                            } else {
+                                throw new IllegalArgumentException("Ungültige Eingabe " + buffer);
+                            }
+                        } else if (buffer.toLowerCase().startsWith("clear ")) {
+                            String option = buffer.substring(6).trim();
+                            if (!options.containsKey(option)) {
+                                throw new IllegalArgumentException("Unbekannte Option "+option);
+                            }
+                            options.put(option, null);
+                            printOptions(options);
+                        } else {
+                            throw new IllegalArgumentException("Unbekannter Befehl "+buffer);
+                        }
+                    } catch (IllegalArgumentException e) {
+                        System.out.println(e.getMessage());
+                        printCommands();
+                    }
+
+                } while (buffer != null);
+            } finally {
+                scan.close();
+            }
         }
     }
 
@@ -86,7 +157,7 @@ public class Main {
             printHelp();
             System.exit(1);
         }
-        System.out.println(options);
+        printOptions(options);
         return options;
     }
 
@@ -98,5 +169,18 @@ public class Main {
         System.out.println("\nKeine Options startet den interaktiven Modus.");
     }
 
+    private static void printCommands() {
+        for (String[] command : COMMANDS) {
+            System.out.printf("%-20s  %s\n", command[0], command[1]);
+        }
+        System.out.println();
+    }
 
+    private static void printOptions(Map<String, String> options) {
+        System.out.println("OPTION     WERT");
+        for (Map.Entry<String, String> e : options.entrySet()) {
+            System.out.printf("%-10s %s\n", e.getKey(), e.getValue() != null ? e.getValue() : "-");
+        }
+        System.out.println();
+    }
 }
