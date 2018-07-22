@@ -1,11 +1,14 @@
 package JavaKlausur;
 
+import JavaKlausur.model.Benutzer;
+import JavaKlausur.model.Bewertung;
 import JavaKlausur.model.Film;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class Main {
@@ -22,9 +25,10 @@ public class Main {
     };
 
     static String[][] COMMANDS = {
-        {"user [<name>]", "Wechselt den Benutzer"},
+        {"user <name>", "Wechselt den Benutzer"},
         {"list [<film>]", "Zeigt Filme an"},
         {"film <id>", "Zeigt die Details zu dem Film mit der ID an"},
+        {"rate <film>=<bewertung>", "Setzt die Bewertung (0.0 - 5.0) für den Film für den aktuellen Benutzer"},
         {"ratings", "Zeigt die Bewertungen des gesetzten Benutzers"},
         {"recos", "Filmempfehlungen"},
         {"options", "Zeigt die konfigurierbaren Optionen an"},
@@ -33,6 +37,9 @@ public class Main {
         {"quit", "Programm beenden"},
         {"help", "Diese Liste"}
     };
+
+    static String MOVIE_DB = "./movieproject.db";
+    static String CUSTOM_RATINGS = "./ratings.db";
 
     public static void main(String[] args) throws IOException {
         if (args.length > 0) {
@@ -55,23 +62,25 @@ public class Main {
             System.out.println("MOVIE DATABASE\n");
             System.out.println("loading data...");
 
-            Repository repository = Repository.fillRepository("./movieproject.db");
-            System.out.println("loaded " + repository.getFilme().size()+" movies");
+            Repository repository = Repository.fillRepository(MOVIE_DB);
+            List<Bewertung> customRatings = repository.addCustomRatings(CUSTOM_RATINGS);
+
+            System.out.println("loaded " + repository.getFilme().size()+" movies and "+customRatings.size()+" custom ratings");
 
             printCommands();
 
             Scanner scan = new Scanner(System.in);
             Map<String, String> options = new TreeMap<>();  // stores session options sorted
-            options.put("user", null);
             for (String[] option : OPTIONS) {
                 if (option[2] != null) {
                     options.put(option[1],null);
                 }
             }
+            Benutzer user = null;
             String buffer = null;
             try {
                 do {
-                    System.out.printf("%s$ ", options.get("user") != null ? options.get("user") : "");
+                    System.out.printf("%s$ ", user != null ? user.getName() : "");
                     buffer = scan.nextLine();
 
                     try {
@@ -109,11 +118,68 @@ public class Main {
                             }
                         } else if (buffer.toLowerCase().startsWith("clear ")) {
                             String option = buffer.substring(6).trim();
-                            if (!options.containsKey(option)) {
-                                throw new IllegalArgumentException("Unbekannte Option "+option);
+                            if (option.equalsIgnoreCase("user")) {
+                                user = null;
+                            } else {
+                                if (!options.containsKey(option)) {
+                                    throw new IllegalArgumentException("Unbekannte Option " + option);
+                                }
+                                options.put(option, null);
+                                printOptions(options);
                             }
-                            options.put(option, null);
-                            printOptions(options);
+                        } else if (buffer.equalsIgnoreCase("ratings")) {
+                            if (user == null) {
+                                throw new IllegalArgumentException("Kein Benutzer gesetzt (user <name>)");
+                            }
+                            Benutzer u = user; // soll effective final sein für lambda Ausdruck
+                            List<Bewertung> result = repository.getBewertungen().stream().filter(b -> u.equals(b.getBenutzer())).collect(Collectors.toList());
+                            Utils.dump(result);
+                        } else if (buffer.toLowerCase().startsWith("user ")) {
+                            String[] kv = Utils.splitAndTrimQuotes(buffer, " ", 2);
+                            if (kv.length == 2 && !kv[1].isEmpty()) {
+                                user = repository.ensureBenutzer(kv[1]);
+                            } else {
+                                throw new IllegalArgumentException("Kein Nutzername angegeben " + buffer);
+                            }
+                        } else if (buffer.toLowerCase().startsWith("rate ")) {
+                            if (user == null) {
+                                throw new IllegalArgumentException("Kein Benutzer gesetzt (user <name>)");
+                            }
+
+                            String[] kv = Utils.splitAndTrimQuotes(buffer.substring(5), "=", 2);
+                            if (kv.length == 2) {
+                                Film f = repository.getFilm(Integer.parseInt(kv[0]));
+                                if (f == null) {
+                                    throw new IllegalArgumentException("Unbekannter Film " + kv[0] + " in " + buffer);
+                                }
+
+                                // ignore duplicate ratings
+                                Bewertung neueBewertung = repository.addBewertung(user, f, Double.parseDouble(kv[1]));
+                                BufferedWriter writer = null;
+                                try {
+                                    writer = new BufferedWriter(new FileWriter(CUSTOM_RATINGS, true));
+                                    writer.write("\"" + user.getName() + "\",\"" + neueBewertung.getRating() + "\",\"" + neueBewertung.getFilm().getId() + "\"");
+                                    writer.newLine();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                } finally {
+                                    try {
+                                        if (writer != null) {
+                                            writer.close();
+                                        }
+                                    } catch (IOException e) {
+                                    }
+                                }
+                            } else {
+                                throw new IllegalArgumentException("Keine gültige Bewertung angegeben " + buffer);
+                            }
+                        } else if (buffer.equalsIgnoreCase("recos")) {
+                            if (user == null) {
+                                throw new IllegalArgumentException("Kein Benutzer gesetzt (user <name>)");
+                            }
+                            List<Film> filmList = repository.suchen(null, user, null, null, null, options.get("limit") != null ? Integer.parseInt(options.get("limit")) : 200);
+                            System.out.printf(filmList.size()+" Filmempfehlungen (max %s) für %s gefunden:\n\n", options.get("limit") != null ? Integer.parseInt(options.get("limit")) : 200, user.getName());
+                            Utils.dump(filmList);
                         } else {
                             throw new IllegalArgumentException("Unbekannter Befehl "+buffer);
                         }

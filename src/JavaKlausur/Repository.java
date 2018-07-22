@@ -3,6 +3,7 @@ package JavaKlausur;
 import JavaKlausur.model.*;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
@@ -33,7 +34,7 @@ public class Repository {
         this.bewertungen.add(bewertung);
     }
 
-    private Benutzer ensureBenutzer(String name) {
+    public Benutzer ensureBenutzer(String name) {
         Benutzer b = getBenutzer(name);
         if (b == null) {
             b = new Benutzer(name);
@@ -82,7 +83,7 @@ public class Repository {
         return this.genre.get(name);
     }
 
-    private Genre ensureGenre(String name) {
+    public Genre ensureGenre(String name) {
         Genre g = getGenre(name);
         if (g == null) {
             g = new Genre(name);
@@ -151,6 +152,10 @@ public class Repository {
     }
 
     public List<Film> suchen(String fromMovies, String genreFilters, String actorFilters, String directorFilters, int limit) {
+        return suchen(fromMovies,null,genreFilters,actorFilters,directorFilters,limit);
+    }
+
+    public List<Film> suchen(String fromMovies, Benutzer fromUser, String genreFilters, String actorFilters, String directorFilters, int limit) {
     	List<Film> result = new ArrayList<>();
 
         Collection<Film> filmList = null;
@@ -158,7 +163,21 @@ public class Repository {
         if (fromMovies != null) {
             filmList = new TreeSet<>(Comparator.comparingDouble(Film::getRating).reversed()); // sort by Film.rating desc
 
+            // für alle Filmen mit dem (Teil)Titel
             List<Film> filmsByTitle = suchenMitTitel(fromMovies);
+            // ..Benutzer finden, die die auch gut finden und deren guten Filme raus suchen
+            for (Film f : filmsByTitle) {
+                List<Benutzer> benutzer = f.getBenutzer(4.0);
+                for (Benutzer b : benutzer) {
+                    filmList.addAll(b.getFilme(4.0));
+                }
+            }
+        } else if (fromUser != null) {
+            filmList = new TreeSet<>(Comparator.comparingDouble(Film::getRating).reversed()); // sort by Film.rating desc
+
+            // für alle guten Filmen des fromUser
+            List<Film> filmsByTitle = fromUser.getFilme(4.0);
+            // ..Benutzer finden, die die auch gut finden und deren guten Filme raus suchen
             for (Film f : filmsByTitle) {
                 List<Benutzer> benutzer = f.getBenutzer(4.0);
                 for (Benutzer b : benutzer) {
@@ -258,11 +277,7 @@ public class Repository {
                             Benutzer user = repository.ensureBenutzer(zeile.get(0));
                             f = repository.getFilm(Integer.parseInt(zeile.get(2)));
 
-                            Bewertung rating = new Bewertung(user, f, Double.parseDouble(zeile.get(1)));
-
-                            repository.addBewertung(rating);
-                            user.addBewertung(rating);
-                            f.addBewertung(rating);
+                            repository.addBewertung(user, f, Double.parseDouble(zeile.get(1)));
 
                             break;
                     }
@@ -276,6 +291,35 @@ public class Repository {
         System.out.println("loading repository took "+(end-start)+"ms");
         
         return repository;
+    }
+
+    public Bewertung addBewertung(Benutzer user, Film f, double rating) {
+        Bewertung b = new Bewertung(user, f, rating);
+        this.addBewertung(b);
+        user.addBewertung(b);
+        f.addBewertung(b);
+        return b;
+    }
+
+    public List<Bewertung> addCustomRatings(String fileName) throws IOException {
+        List<Bewertung> bewertungen = new ArrayList<>();
+
+        File r = new File(fileName);
+        if (r.exists()) {
+            BufferedReader reader = new BufferedReader(new FileReader(r));
+            String buffer = null;
+            try {
+                while ((buffer = reader.readLine()) != null) {
+                    List<String> zeile = Utils.zeileZerlegen(buffer);
+                    Benutzer user = ensureBenutzer(zeile.get(0));
+                    Film f = getFilm(Integer.parseInt(zeile.get(2)));
+                    bewertungen.add(addBewertung(user, f, Double.parseDouble(zeile.get(1))));
+                }
+            } finally {
+                reader.close();
+            }
+        }
+        return bewertungen;
     }
 }
 	
