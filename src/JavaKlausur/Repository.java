@@ -157,13 +157,13 @@ public class Repository {
         Collection<Film> filmList = null;
 
         if (fromMovies != null) {
-            filmList = new HashSet<>();
+            filmList = new TreeSet<>(Comparator.comparingDouble(Film::getRating).reversed()); // sort by Film.rating desc
 
             List<Film> filmsByTitle = suchenMitTitel(fromMovies);
             for (Film f : filmsByTitle) {
-                List<Benutzer> benutzer = f.getBenutzer(5.0);
+                List<Benutzer> benutzer = f.getBenutzer(4.0);
                 for (Benutzer b : benutzer) {
-                    filmList.addAll(b.getFilme(5.0));
+                    filmList.addAll(b.getFilme(4.0));
                 }
             }
         } else {
