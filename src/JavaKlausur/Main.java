@@ -2,6 +2,8 @@ package JavaKlausur;
 
 import JavaKlausur.model.Film;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
@@ -20,26 +22,32 @@ public class Main {
     };
 
     static String[][] COMMANDS = {
-            {"user [<name>]", "Wechselt den Benutzer"},
-            {"list [<film>]", "Zeigt Filme an"},
-            {"film <id>", "Zeigt die Details zu dem Film mit der ID an"},
-            {"ratings", "Zeigt die Bewertungen des gesetzten Benutzers"},
-            {"recos", "Filmempfehlungen"},
-            {"options", "Zeigt die konfigurierbaren Optionen an"},
-            {"set <option>=<value>", "setzt eine Option"},
-            {"clear <option>", "löscht die Option"},
-            {"quit", "Programm beenden"},
-            {"help", "Diese Liste"}
-
+        {"user [<name>]", "Wechselt den Benutzer"},
+        {"list [<film>]", "Zeigt Filme an"},
+        {"film <id>", "Zeigt die Details zu dem Film mit der ID an"},
+        {"ratings", "Zeigt die Bewertungen des gesetzten Benutzers"},
+        {"recos", "Filmempfehlungen"},
+        {"options", "Zeigt die konfigurierbaren Optionen an"},
+        {"set <option>=<value>", "setzt eine Option"},
+        {"clear <option>", "löscht die Option"},
+        {"quit", "Programm beenden"},
+        {"help", "Diese Liste"}
     };
 
     public static void main(String[] args) throws IOException {
         if (args.length > 0) {
             Map<String, String> options = parseOptions(args);
+
+            if (options.containsKey("t")) {
+                doTest();
+                System.exit(0);
+            }
+
             if (options.containsKey("h")) {
                 printHelp();
                 System.exit(0);
             }
+
             List<Film> result = getRepository().suchen(options.get("f"), options.get("g"), options.get("a"), options.get("d"), options.containsKey("l") ? Integer.parseInt(options.get("l")) : 200);
             Utils.dump(result);
             System.exit(0);
@@ -121,6 +129,41 @@ public class Main {
         }
     }
 
+    private static void doTest() {
+        Repository repository = getRepository();
+        BufferedWriter writer = null;
+        try {
+            writer = new BufferedWriter(new FileWriter("result.txt"));
+
+            List<Film> result = repository.suchen("Matrix Revolutions", "Thriller", null, null, 10);
+            for (Film f : result) {
+                writer.write(f.toString());
+                writer.newLine();
+            }
+            result = repository.suchen("Indiana Jones and the Temple of Doom", "Adventure", null, null, 15);
+            for (Film f : result) {
+                writer.write(f.toString());
+                writer.newLine();
+            }
+            result = repository.suchen(null, "Action", "Jason Statham,Keanu Reeves", null, 50);
+            for (Film f : result) {
+                writer.write(f.toString());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (writer != null) {
+                    writer.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
     private static Repository getRepository() {
         if (repository == null) {
             try {
@@ -150,14 +193,13 @@ public class Main {
                 if (match[2] != null && kv[1] == null) {
                     throw new IllegalArgumentException("missing value of parameter " + kv[0] + " in " + s);
                 }
-                options.put(match[0], kv[1]);
+                options.put(match[0], kv.length > 1 ? kv[1] : null);
             }
         } catch(IllegalArgumentException e) {
             System.err.println(e.getMessage());
             printHelp();
             System.exit(1);
         }
-        printOptions(options);
         return options;
     }
 
