@@ -77,19 +77,4 @@ public class Utils {
         }
         return words;
     }
-
-    public static double distance(double d1, double d2) {
-        return Math.abs(d1-d2);
-    }
-
-    public static  double distance(double[] v1, double[] v2) {
-        double d = 0;
-
-        assert v1.length == v2.length : "die Vektoren müssen gleich lang sein";
-
-        for (int i=0; i<v1.length; i++) {
-            d += Math.pow(v1[i]-v2[i], 2.0);
-        }
-        return Math.sqrt(d);
-    }
 }
