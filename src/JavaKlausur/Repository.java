@@ -33,7 +33,6 @@ public class Repository {
         this.bewertungen.add(bewertung);
     }
 
-    // @TODO was soll das?
     private Benutzer ensureBenutzer(String name) {
         Benutzer b = getBenutzer(name);
         if (b == null) {
@@ -172,7 +171,7 @@ public class Repository {
 
         // FILTER MOVIE LIST
 
-        // split all parameters with comma as spearator; ignore null values
+        // split all parameters with comma as separator; ignore null values
     	String[] genres = (genreFilters != null ? genreFilters.split(",") : null);
     	String[] actors = (actorFilters != null ? actorFilters.split(",") : null);
     	String[] directors = (directorFilters != null ? directorFilters.split(",") : null);

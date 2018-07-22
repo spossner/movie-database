@@ -171,7 +171,29 @@ public class RepositoryTest {
         List<Benutzer> benutzer = matrixMovie.getBenutzer(5.0);
         assertEquals(95, benutzer.size());
     }
-/*
+
+    @Test
+    public void testTestModeMatrixRevolutions() {
+        List<Film> filmList = repository.suchen("Matrix Revolutions", "Thriller", null, null, 10);
+        assertEquals(10, filmList.size());
+        Utils.dump(filmList);
+    }
+
+    @Test
+    public void testTestModeIndianaJones() {
+        List<Film> filmList = repository.suchen("Indiana Jones and the Temple of Doom", "Adventure", null, null, 15);
+        assertEquals(15, filmList.size());
+        Utils.dump(filmList);
+    }
+
+    @Test
+    public void testTestModeJasonKeanu() {
+        List<Film> filmList = repository.suchen(null, "Action", "Jason Statham,Keanu Reeves", null, 50);
+        assertEquals(50, filmList.size());
+        Utils.dump(filmList);
+    }
+
+    /*
     @Test
     public void testMoviesByUsers() {
         Film film = repository.getFilm(285);
