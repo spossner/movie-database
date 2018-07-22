@@ -154,8 +154,8 @@ public class RepositoryTest {
 
     @Test
     public void testFindMoviesWithGoodRating() {
-        List<Film> filmList = repository.suchen("Matrix", null, null, null, 2000);
-        assertEquals(1452, filmList.size());
+        List<Film> filmList = repository.suchen("Matrix", null, null, null);
+        assertEquals(63, filmList.size());
     }
 
     @Test
