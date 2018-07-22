@@ -64,12 +64,8 @@ public class Utils {
         return zeile;
     }
 
-    public static String[] splitAndTrimQuotes(String buffer) {
-        return splitAndTrimQuotes(buffer, ",", 0);
-    }
-
-    public static String[] splitAndTrimQuotes(String buffer, char separator) {
-        return splitAndTrimQuotes(buffer, String.valueOf(separator), 0);
+    public static String[] splitAndTrimQuotes(String buffer, String separator) {
+        return splitAndTrimQuotes(buffer, separator, 0);
     }
 
     public static String[] splitAndTrimQuotes(String buffer, String separator, int maxSplits) {
