@@ -39,7 +39,7 @@ public class Benutzer {
     }
 
     public List<Film> getFilme(double minRating) {
-        return this.bewertungen.stream().filter(b -> b.getRating() >= minRating).map(Bewertung::getFilm).collect(Collectors.toList());
+        return this.bewertungen.stream().filter(b -> b.getRating() >= minRating).map(b -> b.getFilm()).collect(Collectors.toList());
     }
 
     @Override
